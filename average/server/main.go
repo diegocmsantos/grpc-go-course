@@ -3,12 +3,17 @@ package main
 import (
 	"fmt"
 	"io"
+	"log"
+	"net"
 
 	"github.com/grpc-go-course/average/averagepb"
+	"google.golang.org/grpc"
 )
 
-type server struct {
+const port = ":50051"
 
+type server struct {
+	averagepb.UnimplementedAverageServiceServer
 }
 
 func (s *server) Average(resp averagepb.AverageService_AverageServer) error {
@@ -26,5 +31,20 @@ func (s *server) Average(resp averagepb.AverageService_AverageServer) error {
 
 		sum += req.GetNumber()
 		counter++
+	}
+}
+
+func main() {
+	fmt.Println("Starting server...")
+
+	lis, err := net.Listen("tcp", port)
+	if err != nil {
+		log.Fatalf("Failed to listen: %v", err)
+	}
+
+	s := grpc.NewServer()
+	averagepb.RegisterAverageServiceServer(s, &server{})
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
 	}
 }
