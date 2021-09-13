@@ -4,7 +4,7 @@ package average;
 option go_package="/averagepb";
 
 message AverageRequest {
-  int32 number = 1;
+  float number = 1;
 }
 
 message AverageResponse {
@@ -12,5 +12,5 @@ message AverageResponse {
 }
 
 service AverageService {
-  rpc Sum(stream AverageRequest) returns (AverageResponse) {};
+  rpc Average(stream AverageRequest) returns (AverageResponse) {};
 }
