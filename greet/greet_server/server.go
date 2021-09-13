@@ -52,8 +52,8 @@ func (s *server) LongGreet(stream greetpb.GreetService_LongGreetServer) error {
 		}
 
 		firstName := resp.GetGreeting().GetFirstName()
-		fmt.Printf("server has received [%s] from the client", firstName)
-		result += firstName + "! "
+		fmt.Printf("server has received [%s] from the client\n", firstName)
+		result += fmt.Sprintf("%s!", firstName)
 	}
 }
 
