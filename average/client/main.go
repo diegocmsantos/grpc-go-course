@@ -37,15 +37,10 @@ func doClientStreaming(c averagepb.AverageServiceClient) {
 		log.Fatalf("error calling Average RPC: %v", err)
 	}
 
-	requests := []*averagepb.AverageRequest{
-		{Number: 1},
-		{Number: 2},
-		{Number: 3},
-		{Number: 4},
-	}
+	numbers := []float32{3, 5, 9, 54, 23}
 
-	for _, req := range requests {
-		err := stream.Send(req)
+	for _, num := range numbers {
+		err := stream.Send(&averagepb.AverageRequest{Number: num})
 		if err != nil {
 			fmt.Printf("error while sending request to the server: %v", err)
 		}
@@ -56,5 +51,5 @@ func doClientStreaming(c averagepb.AverageServiceClient) {
 	if err != nil {
 		fmt.Printf("error while receiving response from the server: %v", err)
 	}
-	fmt.Printf("Response from Average: %v", resp.Average)
+	fmt.Printf("Response from Average: %v", resp.GetAverage())
 }
