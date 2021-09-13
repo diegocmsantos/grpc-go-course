@@ -29,6 +29,7 @@ func (s *server) Average(resp averagepb.AverageService_AverageServer) error {
 			return err
 		}
 
+		fmt.Printf("number from the client: %f", req.GetNumber())
 		sum += req.GetNumber()
 		counter++
 	}

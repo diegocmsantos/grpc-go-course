@@ -49,7 +49,7 @@ func doClientStreaming(c averagepb.AverageServiceClient) {
 		if err != nil {
 			fmt.Printf("error while sending request to the server: %v", err)
 		}
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(1000 * time.Millisecond)
 	}
 
 	resp, err := stream.CloseAndRecv()
