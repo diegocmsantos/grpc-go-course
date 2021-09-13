@@ -16,14 +16,17 @@ type server struct {
 }
 
 func (s *server) GetPrimeNumbers(req *primenumberpb.PrimeNumberRequest, stream primenumberpb.PrimeNumberService_GetPrimeNumbersServer) error {
-	k := int32(2)
+	divisor := int32(2)
 	n := req.GetPrimeNumber()
 	for n > 1 {
-		if n % k == 0 {
-			stream.SendMsg(&primenumberpb.PrimeNumberResponse{Result: k})
-			n = n / k
+		if n %divisor == 0 {
+			err := stream.SendMsg(&primenumberpb.PrimeNumberResponse{Result: divisor})
+			if err != nil {
+				return err
+			}
+			n = n / divisor
 		} else {
-			k++
+			divisor++
 		}
 	}
 	return nil
