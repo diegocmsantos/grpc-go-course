@@ -66,13 +66,17 @@ func (s *server) GreetEveryone(stream greetpb.GreetService_GreetEveryoneServer) 
 				fmt.Println("End of file")
 				return nil
 			}
-			log.Fatalf("error while reading client stream: %v", err)
+			log.Fatalf("error while reading client stream: %v\n", err)
 			return err
 		}
 
 		firstName := req.GetGreeting().GetFirstName()
+		fmt.Printf("Received from the client: %s\n", firstName)
 		result := fmt.Sprintf("Hello %s", firstName)
-		return stream.Send(&greetpb.GreetEveryoneResponse{Result: result})
+		err = stream.Send(&greetpb.GreetEveryoneResponse{Result: result})
+		if err != nil {
+			log.Fatalf("error while sending data to the client: %v\n", err)
+		}
 	}
 }
 
