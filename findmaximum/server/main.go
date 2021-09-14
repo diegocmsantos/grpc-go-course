@@ -3,12 +3,17 @@ package main
 import (
 	"fmt"
 	"io"
+	"log"
+	"net"
 
 	"github.com/grpc-go-course/findmaximum/findmaximumpb"
+	"google.golang.org/grpc"
 )
 
-type server struct {
+const port = ":50051"
 
+type server struct {
+	findmaximumpb.UnimplementedFindMaximumServiceServer
 }
 
 func (s *server) FindMaximum(stream findmaximumpb.FindMaximumService_FindMaximumServer) error {
@@ -38,5 +43,16 @@ func (s *server) FindMaximum(stream findmaximumpb.FindMaximumService_FindMaximum
 }
 
 func main() {
+	fmt.Println("Starting server...")
 
+	lis, err := net.Listen("tcp", port)
+	if err != nil {
+		log.Fatalf("Failed to listen: %v", err)
+	}
+
+	s := grpc.NewServer()
+	findmaximumpb.RegisterFindMaximumServiceServer(s, &server{})
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
 }
