@@ -4,11 +4,11 @@ package findmaximum;
 option go_package="/findmaximumpb";
 
 message FindMaximumRequest {
-  float number = 1;
+  int32 number = 1;
 }
 
 message FindMaximumResponse {
-  float average = 1;
+  int32 average = 1;
 }
 
 service FindMaximumService {
