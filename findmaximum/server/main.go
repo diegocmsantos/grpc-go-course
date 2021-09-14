@@ -34,10 +34,10 @@ func (s *server) FindMaximum(stream findmaximumpb.FindMaximumService_FindMaximum
 		if n > max {
 			max = n
 			fmt.Printf("new max number is [%d]\n", max)
-		}
-		err = stream.Send(&findmaximumpb.FindMaximumResponse{Average: max})
-		if err != nil {
-			return fmt.Errorf("error while responding the client: %v\n", err)
+			err = stream.Send(&findmaximumpb.FindMaximumResponse{Average: max})
+			if err != nil {
+				return fmt.Errorf("error while responding the client: %v\n", err)
+			}
 		}
 	}
 }
