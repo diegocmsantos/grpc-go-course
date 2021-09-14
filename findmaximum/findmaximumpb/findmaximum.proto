@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package findmaximum;
+option go_package="/findmaximumpb";
+
+message FindMaximumRequest {
+  float number = 1;
+}
+
+message FindMaximumResponse {
+  float average = 1;
+}
+
+service FindMaximumService {
+  rpc FindMaximum(stream FindMaximumRequest) returns (stream FindMaximumResponse) {};
+}
