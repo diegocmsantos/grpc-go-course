@@ -85,17 +85,17 @@ func (s *server) GreetEveryone(stream greetpb.GreetService_GreetEveryoneServer) 
 func (s *server) GreetWithDeadline(ctx context.Context, req *greetpb.GreetWithDeadlineRequest) (*greetpb.GreetWithDeadlineResponse, error) {
 	fmt.Println("GreetWithDeadline function was invoked with a streaming request")
 
-	for i := 0; i < 3; i++ {
-		if ctx.Err() == context.Canceled {
-			fmt.Println("client has canceled the request")
-			return nil, status.Error(codes.DeadlineExceeded, "the client has canceled the request")
-		}
-		time.Sleep(1 * time.Second)
-	}
+	timeoutCtx, cancel := context.WithTimeout(ctx, 2 * time.Second)
+	defer cancel()
 
-	firstName := req.GetGreeting().GetFirstName()
-	fmt.Printf("Received a message from the client: %s\n", firstName)
-	return &greetpb.GreetWithDeadlineResponse{Result: fmt.Sprintf("Hello %s", firstName)}, nil
+	select {
+	case <-time.After(4 * time.Second):
+		firstName := req.GetGreeting().GetFirstName()
+		fmt.Printf("Received a message from the client: %s\n", firstName)
+		return &greetpb.GreetWithDeadlineResponse{Result: fmt.Sprintf("Hello %s", firstName)}, nil
+	case <-timeoutCtx.Done():
+		return nil, status.Error(codes.DeadlineExceeded, fmt.Sprint("Timeout exceeded"))
+	}
 }
 
 func main() {
