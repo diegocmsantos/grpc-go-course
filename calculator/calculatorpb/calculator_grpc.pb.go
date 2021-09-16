@@ -23,6 +23,9 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CalculatorServiceClient interface {
 	Sum(ctx context.Context, in *CalculatorRequest, opts ...grpc.CallOption) (*CalculatorResponse, error)
+	// Error handling
+	// this RPC will throw an exception if the given number is negative
+	// The returned error is of type INVALID_ARGUMENT
 	SquareRoot(ctx context.Context, in *SquareRootRequest, opts ...grpc.CallOption) (*SquareRootResponse, error)
 }
 
@@ -57,6 +60,9 @@ func (c *calculatorServiceClient) SquareRoot(ctx context.Context, in *SquareRoot
 // for forward compatibility
 type CalculatorServiceServer interface {
 	Sum(context.Context, *CalculatorRequest) (*CalculatorResponse, error)
+	// Error handling
+	// this RPC will throw an exception if the given number is negative
+	// The returned error is of type INVALID_ARGUMENT
 	SquareRoot(context.Context, *SquareRootRequest) (*SquareRootResponse, error)
 	mustEmbedUnimplementedCalculatorServiceServer()
 }

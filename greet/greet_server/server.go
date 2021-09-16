@@ -10,6 +10,8 @@ import (
 
 	"github.com/grpc-go-course/greet/greetpb"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 const port = ":50051"
@@ -78,6 +80,22 @@ func (s *server) GreetEveryone(stream greetpb.GreetService_GreetEveryoneServer) 
 			log.Fatalf("error while sending data to the client: %v\n", err)
 		}
 	}
+}
+
+func (s *server) GreetWithDeadline(ctx context.Context, req *greetpb.GreetWithDeadlineRequest) (*greetpb.GreetWithDeadlineResponse, error) {
+	fmt.Println("GreetWithDeadline function was invoked with a streaming request")
+
+	for i := 0; i < 3; i++ {
+		if ctx.Err() == context.Canceled {
+			fmt.Println("client has canceled the request")
+			return nil, status.Error(codes.DeadlineExceeded, "the client has canceled the request")
+		}
+		time.Sleep(1 * time.Second)
+	}
+
+	firstName := req.GetGreeting().GetFirstName()
+	fmt.Printf("Received a message from the client: %s\n", firstName)
+	return &greetpb.GreetWithDeadlineResponse{Result: fmt.Sprintf("Hello %s", firstName)}, nil
 }
 
 func main() {
