@@ -39,7 +39,7 @@ func NewCalculatorServiceClient(cc grpc.ClientConnInterface) CalculatorServiceCl
 
 func (c *calculatorServiceClient) Sum(ctx context.Context, in *CalculatorRequest, opts ...grpc.CallOption) (*CalculatorResponse, error) {
 	out := new(CalculatorResponse)
-	err := c.cc.Invoke(ctx, "/greet.CalculatorService/Sum", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/calculator.CalculatorService/Sum", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func (c *calculatorServiceClient) Sum(ctx context.Context, in *CalculatorRequest
 
 func (c *calculatorServiceClient) SquareRoot(ctx context.Context, in *SquareRootRequest, opts ...grpc.CallOption) (*SquareRootResponse, error) {
 	out := new(SquareRootResponse)
-	err := c.cc.Invoke(ctx, "/greet.CalculatorService/SquareRoot", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/calculator.CalculatorService/SquareRoot", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +100,7 @@ func _CalculatorService_Sum_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/greet.CalculatorService/Sum",
+		FullMethod: "/calculator.CalculatorService/Sum",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CalculatorServiceServer).Sum(ctx, req.(*CalculatorRequest))
@@ -118,7 +118,7 @@ func _CalculatorService_SquareRoot_Handler(srv interface{}, ctx context.Context,
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/greet.CalculatorService/SquareRoot",
+		FullMethod: "/calculator.CalculatorService/SquareRoot",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CalculatorServiceServer).SquareRoot(ctx, req.(*SquareRootRequest))
@@ -130,7 +130,7 @@ func _CalculatorService_SquareRoot_Handler(srv interface{}, ctx context.Context,
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var CalculatorService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "greet.CalculatorService",
+	ServiceName: "calculator.CalculatorService",
 	HandlerType: (*CalculatorServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
