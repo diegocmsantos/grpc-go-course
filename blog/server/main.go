@@ -1,20 +1,63 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net"
 	"os"
 	"os/signal"
+	"time"
 
 	"github.com/grpc-go-course/blog/blogpb"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 const port = ":50051"
 
+var collection *mongo.Collection
+
+type BlogItem struct {
+	ID       primitive.ObjectID `bson:"_id,omitempty"`
+	AuthorID string            `bson:"author_id"`
+	Content  string            `bson:"content"`
+	Title    string            `bson:"title"`
+}
+
 type server struct {
 	blogpb.UnimplementedBlogServiceServer
+}
+
+func (s *server) CreateBlog(ctx context.Context, req *blogpb.CreateBlogRequest) (*blogpb.CreateBlogResponse, error) {
+	blog := req.GetBlog()
+
+	data := BlogItem{
+		AuthorID: blog.GetAuthorId(),
+		Content:  blog.GetContent(),
+		Title:    blog.GetTitle(),
+	}
+
+	res, err := collection.InsertOne(ctx, data)
+	if err != nil {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("error creating blog: %v\n", err))
+	}
+
+	oid, ok := res.InsertedID.(primitive.ObjectID)
+	if !ok {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("cannot convert to objectID: %v\n", err))
+	}
+
+	return &blogpb.CreateBlogResponse{Blog: &blogpb.Blog{
+		Id:       oid.Hex(),
+		AuthorId: blog.GetAuthorId(),
+		Title:    blog.GetTitle(),
+		Content:  blog.GetContent(),
+	}}, nil
 }
 
 func main() {
@@ -22,6 +65,17 @@ func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
 	fmt.Println("Blog Server Started")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
+	defer func() {
+		if err = client.Disconnect(ctx); err != nil {
+			panic(err)
+		}
+	}()
+
+	collection = client.Database("mydb").Collection("blog")
 
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
@@ -48,5 +102,7 @@ func main() {
 	s.Stop()
 	fmt.Println("Closing the listener")
 	lis.Close()
+	fmt.Println("Closing mongodb connection")
+	client.Disconnect(context.TODO())
 	fmt.Println("End of Program")
 }
