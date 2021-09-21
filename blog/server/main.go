@@ -108,6 +108,24 @@ func (s *server) UpdateBlog(ctx context.Context, req *blogpb.UpdateBlogRequest) 
 	return &blogpb.UpdateBlogResponse{Blog: blog}, nil
 }
 
+func (s *server) DeleteBlog(ctx context.Context, req *blogpb.DeleteBlogRequest) (*blogpb.DeleteBlogResponse, error) {
+	fmt.Println("Deleting blog server side")
+
+	blogID := req.GetBlogId()
+	oid, err := primitive.ObjectIDFromHex(blogID)
+	if err != nil {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("error converting the blog ID: %v\n", err))
+	}
+
+	filter := bson.D{{"_id", oid}}
+	_, err = collection.DeleteOne(ctx, filter)
+	if err != nil {
+		return nil, status.Error(codes.NotFound, fmt.Sprintf("blog id [%s] not found", oid.Hex()))
+	}
+
+	return &blogpb.DeleteBlogResponse{BlogId: oid.Hex()}, nil
+}
+
 func main() {
 	// if we crash the code, we get the file name and line number
 	log.SetFlags(log.LstdFlags | log.Lshortfile)

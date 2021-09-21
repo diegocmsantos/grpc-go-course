@@ -39,7 +39,7 @@ message DeleteBlogRequest {
 }
 
 message DeleteBlogResponse {
-  Blog blog = 1;
+  string blog_id = 1;
 }
 
 service BlogService{
