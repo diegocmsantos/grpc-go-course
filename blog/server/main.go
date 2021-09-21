@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/grpc-go-course/blog/blogpb"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -58,6 +59,31 @@ func (s *server) CreateBlog(ctx context.Context, req *blogpb.CreateBlogRequest) 
 		Title:    blog.GetTitle(),
 		Content:  blog.GetContent(),
 	}}, nil
+}
+
+func (s *server) ReadBlog(ctx context.Context, req *blogpb.ReadBlogRequest) (*blogpb.ReadBlogResponse, error) {
+	blogID := req.GetBlogId()
+	oid, err := primitive.ObjectIDFromHex(blogID)
+	if err != nil {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("error converting the blog ID: %v\n", err))
+	}
+
+	var blog BlogItem
+	filter := bson.D{{"_id", oid}}
+
+	err = collection.FindOne(ctx, filter).Decode(&blog)
+	if err != nil {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("error while searching for blog with blog id [%s]", oid.Hex()))
+	}
+
+	return &blogpb.ReadBlogResponse{
+		Blog: &blogpb.Blog{
+			Id:       oid.Hex(),
+			AuthorId: blog.AuthorID,
+			Title:    blog.Title,
+			Content:  blog.Content,
+		},
+	}, nil
 }
 
 func main() {
