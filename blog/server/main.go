@@ -73,7 +73,7 @@ func (s *server) ReadBlog(ctx context.Context, req *blogpb.ReadBlogRequest) (*bl
 
 	err = collection.FindOne(ctx, filter).Decode(&blog)
 	if err != nil {
-		return nil, status.Error(codes.Internal, fmt.Sprintf("error while searching for blog with blog id [%s]", oid.Hex()))
+		return nil, status.Error(codes.NotFound, fmt.Sprintf("blog id [%s] not found", oid.Hex()))
 	}
 
 	return &blogpb.ReadBlogResponse{

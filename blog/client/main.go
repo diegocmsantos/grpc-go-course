@@ -7,6 +7,8 @@ import (
 
 	"github.com/grpc-go-course/blog/blogpb"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 const port = ":50051"
@@ -48,12 +50,20 @@ func createBlog(c blogpb.BlogServiceClient) {
 
 func readBlog(c blogpb.BlogServiceClient) {
 	fmt.Println("Starting reading blog...")
-	blogReq := &blogpb.ReadBlogRequest{BlogId: "614849af7a0f3c911bed9cf"}
+	blogReq := &blogpb.ReadBlogRequest{BlogId: "614983dfba0ec5c19b14d5e6"}
 
 	blogRes, err := c.ReadBlog(context.Background(), blogReq)
 	if err != nil {
-		fmt.Printf("error while reading blog with ID [%s]: %v\n", blogReq.GetBlogId(), err)
-		return
+		grpcErr, ok := status.FromError(err)
+		if ok {
+			if grpcErr.Code() == codes.NotFound {
+				fmt.Println(grpcErr.Message())
+			}
+			if grpcErr.Code() == codes.Internal {
+				fmt.Printf("Unexpected error: %v\n", grpcErr.Message())
+			}
+			return
+		}
 	}
 
 	fmt.Printf("Blog found: %v\n", blogRes.Blog)
