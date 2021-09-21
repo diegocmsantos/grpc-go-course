@@ -29,12 +29,13 @@ func main() {
 
 	c := blogpb.NewBlogServiceClient(cc)
 
-	// createBlog(c)
+	blogID := createBlog(c)
 	// readBlog(c)
-	updateBlog(c)
+	// updateBlog(c)
+	deleteBlog(c, blogID)
 }
 
-func createBlog(c blogpb.BlogServiceClient) {
+func createBlog(c blogpb.BlogServiceClient) string {
 	blog := &blogpb.Blog{
 		AuthorId: "Diego",
 		Title:    "My First Blog",
@@ -47,6 +48,7 @@ func createBlog(c blogpb.BlogServiceClient) {
 		log.Fatalf("Unexpected error: %v", err)
 	}
 	fmt.Printf("Blog has been created: %v\n", res.Blog)
+	return res.Blog.GetId()
 }
 
 func readBlog(c blogpb.BlogServiceClient) {
@@ -95,4 +97,25 @@ func updateBlog(c blogpb.BlogServiceClient) {
 	}
 
 	fmt.Printf("Blog updated: %v\n", res.Blog)
+}
+
+func deleteBlog(c blogpb.BlogServiceClient, blogID string) {
+	fmt.Println("Starting deleting blog...")
+	blogReq := &blogpb.DeleteBlogRequest{BlogId: blogID}
+
+	blogRes, err := c.DeleteBlog(context.Background(), blogReq)
+	if err != nil {
+		grpcErr, ok := status.FromError(err)
+		if ok {
+			if grpcErr.Code() == codes.NotFound {
+				fmt.Println(grpcErr.Message())
+			}
+			if grpcErr.Code() == codes.Internal {
+				fmt.Printf("Unexpected error: %v\n", grpcErr.Message())
+			}
+			return
+		}
+	}
+
+	fmt.Printf("Blog with ID [%s] deleted\n", blogRes.BlogId)
 }
