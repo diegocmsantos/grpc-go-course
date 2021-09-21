@@ -48,7 +48,7 @@ func createBlog(c blogpb.BlogServiceClient) {
 
 func readBlog(c blogpb.BlogServiceClient) {
 	fmt.Println("Starting reading blog...")
-	blogReq := &blogpb.ReadBlogRequest{BlogId: "614849af7a0f3c911bed9cf1"}
+	blogReq := &blogpb.ReadBlogRequest{BlogId: "614849af7a0f3c911bed9cf"}
 
 	blogRes, err := c.ReadBlog(context.Background(), blogReq)
 	if err != nil {
