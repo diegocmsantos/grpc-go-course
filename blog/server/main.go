@@ -118,8 +118,11 @@ func (s *server) DeleteBlog(ctx context.Context, req *blogpb.DeleteBlogRequest) 
 	}
 
 	filter := bson.D{{"_id", oid}}
-	_, err = collection.DeleteOne(ctx, filter)
+	res, err := collection.DeleteOne(ctx, filter)
 	if err != nil {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("error deleting blog with ID [%s]: %v\n", oid.Hex(), err))
+	}
+	if res.DeletedCount == 0 {
 		return nil, status.Error(codes.NotFound, fmt.Sprintf("blog id [%s] not found", oid.Hex()))
 	}
 
