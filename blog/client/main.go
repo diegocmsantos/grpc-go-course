@@ -29,8 +29,9 @@ func main() {
 
 	c := blogpb.NewBlogServiceClient(cc)
 
-	//createBlog(c)
-	readBlog(c)
+	// createBlog(c)
+	// readBlog(c)
+	updateBlog(c)
 }
 
 func createBlog(c blogpb.BlogServiceClient) {
@@ -67,4 +68,31 @@ func readBlog(c blogpb.BlogServiceClient) {
 	}
 
 	fmt.Printf("Blog found: %v\n", blogRes.Blog)
+}
+
+func updateBlog(c blogpb.BlogServiceClient) {
+	fmt.Println("Starting updating blog...")
+
+	blogReq := &blogpb.UpdateBlogRequest{Blog: &blogpb.Blog{
+		Id:       "614849af7a0f3c911bed9cf1",
+		AuthorId: "Keterin",
+		Title:    "Blog Title Updated",
+		Content:  "Blog content updated",
+	}}
+
+	res, err := c.UpdateBlog(context.Background(), blogReq)
+	if err != nil {
+		grpcErr, ok := status.FromError(err)
+		if ok {
+			if grpcErr.Code() == codes.NotFound {
+				fmt.Println(grpcErr.Message())
+			}
+			if grpcErr.Code() == codes.Internal {
+				fmt.Printf("Unexpected error: %v\n", grpcErr.Message())
+			}
+			return
+		}
+	}
+
+	fmt.Printf("Blog updated: %v\n", res.Blog)
 }

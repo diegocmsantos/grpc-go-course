@@ -89,14 +89,18 @@ func (s *server) ReadBlog(ctx context.Context, req *blogpb.ReadBlogRequest) (*bl
 func (s *server) UpdateBlog(ctx context.Context, req *blogpb.UpdateBlogRequest) (*blogpb.UpdateBlogResponse, error) {
 	fmt.Println("Updating a blog...")
 	blog := req.GetBlog()
+	oid, err := primitive.ObjectIDFromHex(blog.GetId())
+	if err != nil {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("error converting the blog ID: %v\n", err))
+	}
 
-	filter := bson.D{{"_id", blog.GetId()}}
+	filter := bson.D{{"_id", oid}}
 	update := bson.D{
 		{"author_id", blog.GetAuthorId()},
 		{"title", blog.GetTitle()},
 		{"content", blog.GetContent()},
 	}
-	_, err := collection.UpdateOne(ctx, filter, update)
+	_, err = collection.ReplaceOne(ctx, filter, update)
 	if err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("error updating blog with ID [%s]: %v", blog.GetId(), err))
 	}
