@@ -86,6 +86,24 @@ func (s *server) ReadBlog(ctx context.Context, req *blogpb.ReadBlogRequest) (*bl
 	}, nil
 }
 
+func (s *server) UpdateBlog(ctx context.Context, req *blogpb.UpdateBlogRequest) (*blogpb.UpdateBlogResponse, error) {
+	fmt.Println("Updating a blog...")
+	blog := req.GetBlog()
+
+	filter := bson.D{{"_id", blog.GetId()}}
+	update := bson.D{
+		{"author_id", blog.GetAuthorId()},
+		{"title", blog.GetTitle()},
+		{"content", blog.GetContent()},
+	}
+	_, err := collection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("error updating blog with ID [%s]: %v", blog.GetId(), err))
+	}
+	
+	return &blogpb.UpdateBlogResponse{Blog: blog}, nil
+}
+
 func main() {
 	// if we crash the code, we get the file name and line number
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
